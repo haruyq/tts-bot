@@ -13,6 +13,7 @@ class JoinCommand(commands.Cog):
         self.bot = bot
 
     @app_commands.command(name="join", description="VCに接続し、読み上げを開始します。")
+    @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.guild.id)
     async def join(self, interaction: discord.Interaction):
         voice = interaction.user.voice
         

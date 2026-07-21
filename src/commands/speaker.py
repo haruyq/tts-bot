@@ -148,6 +148,7 @@ class SpeakerCommand(commands.Cog):
         return view
 
     @app_commands.command(name="speaker", description="話者を変更します。")
+    @app_commands.checks.cooldown(1, 15.0, key=lambda i: i.user.id)
     async def speaker(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
 

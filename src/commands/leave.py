@@ -13,6 +13,7 @@ class LeaveCommand(commands.Cog):
         self.bot = bot
 
     @app_commands.command(name="leave", description="VCから切断します。")
+    @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.guild.id)
     async def leave(self, interaction: discord.Interaction):
         voice = interaction.user.voice
         
