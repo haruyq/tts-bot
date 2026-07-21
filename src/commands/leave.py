@@ -22,7 +22,7 @@ class LeaveCommand(commands.Cog):
         
         if interaction.guild.voice_client:
             await interaction.guild.voice_client.disconnect()
-            await interaction.response.send_message("VCから切断しました。", ephemeral=True)
+            await interaction.response.send_message("VCから切断しました。")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(LeaveCommand(bot))

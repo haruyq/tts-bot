@@ -22,7 +22,7 @@ class JoinCommand(commands.Cog):
         
         if not interaction.guild.voice_client:
             await voice.channel.connect(cls=tts_client.Player)
-            await interaction.response.send_message("VCに接続しました。", ephemeral=True)
+            await interaction.response.send_message("VCに接続しました。")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(JoinCommand(bot))
