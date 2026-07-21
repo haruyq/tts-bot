@@ -34,15 +34,23 @@ class MessageEvent(commands.Cog):
             return
 
         content = message.content.strip()
+        attachments = message.attachments
         
         if content == "s":
             await player.stop()
             return
         
-        if message.attachments:
-            attachment_content = describe_attachments(message.attachments)
-            content = f"{attachment_content}、{content}" if content else attachment_content
+        if message.message_snapshots:
+            for snapshot in message.message_snapshots:
+                if snapshot.content:
+                    content = "メッセージが転送されました。" + snapshot.content.strip()
+                    attachments = snapshot.attachments
+                    break
         
+        if attachments:
+            attachment_content = describe_attachments(attachments)
+            content = f"{attachment_content}、{content}" if content else attachment_content
+            
         speech_text = replace_emojis(re.sub(r"https?://\S+", "リンク省略", content))
         plugin, speaker, style = await get_speaker(message.author.id)
         
