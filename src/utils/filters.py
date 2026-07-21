@@ -58,7 +58,7 @@ async def replace_dict_words(user_id: int, text: str) -> str:
 
 async def default_replace_dict_words(text: str) -> str:
     default_dictionary = {
-        "@": "あて",
+        "@": "あて、",
     }
 
     for word, reading in default_dictionary.items():
