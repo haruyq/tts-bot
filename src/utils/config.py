@@ -3,6 +3,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Config(BaseSettings):
     token: str = "YOUR_BOT_TOKEN"
+    tts_base_url: str = "http://localhost:8000"
+    tts_password: str = "youshallnotpass"
     default_plugin: str = "voicevox"
     default_speaker: str = "東北きりたん"
     default_style: str = "ノーマル"

@@ -45,9 +45,9 @@ class TTSBot(commands.Bot):
         await tts_client.Pool.connect(
             nodes=[
                 tts_client.Node(
-                    "http://127.0.0.1:8000",
-                    password="haruyq",
-                    identifier="dev",
+                    config.tts_base_url,
+                    password=config.tts_password,
+                    identifier="main",
                 ),
             ],
             client=self,
