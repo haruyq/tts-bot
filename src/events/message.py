@@ -5,7 +5,7 @@ import tts_client
 import re
 import time
 
-from utils.filters import replace_emojis, describe_attachments, replace_dict_words
+from utils.filters import replace_emojis, describe_attachments, replace_dict_words, default_replace_dict_words
 from utils.db import get_speaker
 from utils.logger import Logger
 
@@ -33,7 +33,7 @@ class MessageEvent(commands.Cog):
         if not voice or voice.channel != player.channel:
             return
 
-        content = message.content.strip()
+        content = message.clean_content
         attachments = message.attachments
         
         if content == "s":
@@ -50,13 +50,14 @@ class MessageEvent(commands.Cog):
         if attachments:
             attachment_content = describe_attachments(attachments)
             content = f"{attachment_content}、{content}" if content else attachment_content
-            
+        
         speech_text = replace_emojis(re.sub(r"https?://\S+", "リンク省略", content))
         plugin, speaker, style = await get_speaker(message.author.id)
         
         if not speech_text:
             return
-
+        
+        speech_text = await default_replace_dict_words(speech_text)
         speech_text = await replace_dict_words(message.author.id, speech_text)
 
         await player.play(tts_client.Speech(

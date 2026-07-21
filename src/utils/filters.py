@@ -55,3 +55,13 @@ async def replace_dict_words(user_id: int, text: str) -> str:
         text = text.replace(word, reading)
 
     return text
+
+async def default_replace_dict_words(text: str) -> str:
+    default_dictionary = {
+        "@": "あて",
+    }
+
+    for word, reading in default_dictionary.items():
+        text = text.replace(word, reading)
+
+    return text
