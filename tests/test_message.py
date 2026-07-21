@@ -45,6 +45,9 @@ class MessageEventTest(unittest.IsolatedAsyncioTestCase):
         with patch(
             "events.message.get_speaker",
             AsyncMock(return_value=("voicevox", "ずんだもん", "ノーマル")),
+        ), patch(
+            "events.message.get_dictionary",
+            AsyncMock(return_value=[]),
         ):
             await asyncio.gather(*(
                 MessageEvent(None).on_message(message)

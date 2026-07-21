@@ -3,10 +3,10 @@ from discord.ext import commands
 
 import tts_client
 import json
-from pathlib import Path
 import re
+from pathlib import Path
 
-from utils.db import get_speaker
+from utils.db import get_speaker, get_dictionary
 from utils.logger import Logger
 
 Log = Logger(__name__)
@@ -55,6 +55,14 @@ def describe_attachments(attachments: list[discord.Attachment]) -> str:
 
     return f"{'と'.join(parts)}が送信されました"
 
+async def replace_dict_words(user_id: int, text: str) -> str:
+    user_dictionary = dict(await get_dictionary(user_id))
+
+    for word, reading in user_dictionary.items():
+        text = text.replace(word, reading)
+
+    return text
+
 class MessageEvent(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -90,6 +98,8 @@ class MessageEvent(commands.Cog):
         
         if not speech_text:
             return
+
+        speech_text = await replace_dict_words(message.author.id, speech_text)
 
         await player.play(tts_client.Speech(
             text=speech_text,
