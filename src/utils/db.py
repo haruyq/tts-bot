@@ -21,11 +21,32 @@ async def init_db() -> None:
         """)
         await db.execute("""
             CREATE TABLE IF NOT EXISTS dictionary (
-                user_id INTEGER PRIMARY KEY,
+                user_id INTEGER NOT NULL,
                 word TEXT NOT NULL,
-                reading TEXT NOT NULL
+                reading TEXT NOT NULL,
+                PRIMARY KEY (user_id, word)
             )
         """)
+
+        async with db.execute("PRAGMA table_info(dictionary)") as cursor:
+            dictionary_columns = await cursor.fetchall()
+
+        if [column[1] for column in dictionary_columns if column[5]] == ["user_id"]:
+            await db.execute("ALTER TABLE dictionary RENAME TO old_dictionary")
+            await db.execute("""
+                CREATE TABLE dictionary (
+                    user_id INTEGER NOT NULL,
+                    word TEXT NOT NULL,
+                    reading TEXT NOT NULL,
+                    PRIMARY KEY (user_id, word)
+                )
+            """)
+            await db.execute("""
+                INSERT INTO dictionary (user_id, word, reading)
+                SELECT user_id, word, reading FROM old_dictionary
+            """)
+            await db.execute("DROP TABLE old_dictionary")
+
         await db.commit()
 
 async def set_speaker(
@@ -81,8 +102,7 @@ async def set_dictionary(
             """
             INSERT INTO dictionary (user_id, word, reading)
             VALUES (?, ?, ?)
-            ON CONFLICT(user_id) DO UPDATE SET
-                word = excluded.word,
+            ON CONFLICT(user_id, word) DO UPDATE SET
                 reading = excluded.reading
             """,
             (user_id, word, reading),

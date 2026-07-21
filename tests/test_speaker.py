@@ -27,6 +27,37 @@ class SpeakerLayoutTest(unittest.TestCase):
         )
 
 class DatabaseTest(unittest.IsolatedAsyncioTestCase):
+    async def test_dictionary_keeps_multiple_words(self):
+        original_path = db.DB_PATH
+
+        with tempfile.TemporaryDirectory() as directory:
+            db.DB_PATH = Path(directory) / "main.db"
+
+            try:
+                with closing(sqlite3.connect(db.DB_PATH)) as connection:
+                    connection.execute("""
+                        CREATE TABLE dictionary (
+                            user_id INTEGER PRIMARY KEY,
+                            word TEXT NOT NULL,
+                            reading TEXT NOT NULL
+                        )
+                    """)
+                    connection.execute(
+                        "INSERT INTO dictionary VALUES (?, ?, ?)",
+                        (1, "既存", "きそん"),
+                    )
+                    connection.commit()
+
+                await db.init_db()
+                await db.set_dictionary(1, "追加", "ついか")
+
+                self.assertCountEqual(
+                    await db.get_dictionary(1),
+                    [("既存", "きそん"), ("追加", "ついか")],
+                )
+            finally:
+                db.DB_PATH = original_path
+
     async def test_migrates_existing_speaker(self):
         original_path = db.DB_PATH
 
