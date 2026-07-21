@@ -87,6 +87,9 @@ class MessageEvent(commands.Cog):
         
         speech_text = replace_emojis(re.sub(r"https?://\S+", "リンク省略", content))
         plugin, speaker, style = await get_speaker(message.author.id)
+        
+        if not speech_text:
+            return
 
         await player.play(tts_client.Speech(
             text=speech_text,
