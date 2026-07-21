@@ -9,6 +9,37 @@ from utils.logger import Logger
 
 Log = Logger(__name__)
 
+def describe_attachments(attachments: list[discord.Attachment]) -> str:
+    counts = {
+        "画像ファイル": 0,
+        "動画ファイル": 0,
+        "音声ファイル": 0,
+        "文書ファイル": 0,
+        "添付ファイル": 0,
+    }
+
+    for attachment in attachments:
+        content_type = attachment.content_type or ""
+
+        if content_type.startswith("image/"):
+            counts["画像ファイル"] += 1
+        elif content_type.startswith("video/"):
+            counts["動画ファイル"] += 1
+        elif content_type.startswith("audio/"):
+            counts["音声ファイル"] += 1
+        elif content_type.startswith("text/"):
+            counts["文書ファイル"] += 1
+        else:
+            counts["添付ファイル"] += 1
+
+    parts = [
+        f"{file_type}{count}件"
+        for file_type, count in counts.items()
+        if count > 0
+    ]
+
+    return f"{'と'.join(parts)}が送信されました"
+
 class MessageEvent(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -20,23 +51,29 @@ class MessageEvent(commands.Cog):
         
         if not message.guild:
             return
-
-        if not message.content:
-            return
         
         player: tts_client.Player = message.guild.voice_client
         if not player:
             return
         
-        content = re.sub(r"https?://\S+", "リンク省略", message.content)
-        plugin, speaker, style = await get_speaker(message.author.id)
+        if not message.channel == player.channel:
+            return
 
+        content = message.content.strip()
+        
+        if message.attachments:
+            attachment_content = describe_attachments(message.attachments)
+            content = f"{attachment_content}、{content}" if content else attachment_content
+            
         if content == "s":
             await player.stop()
             return
+        
+        speech_text = re.sub(r"https?://\S+", "リンク省略", content)
+        plugin, speaker, style = await get_speaker(message.author.id)
 
         await player.play(tts_client.Speech(
-            text=content,
+            text=speech_text,
             plugin=plugin,
             speaker=speaker,
             options={"style": style} if style is not None else {},
