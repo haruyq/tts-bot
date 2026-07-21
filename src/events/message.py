@@ -3,6 +3,7 @@ from discord.ext import commands
 
 import tts_client
 import re
+import time
 
 from utils.filters import replace_emojis, describe_attachments, replace_dict_words
 from utils.db import get_speaker
@@ -21,6 +22,8 @@ class MessageEvent(commands.Cog):
         
         if not message.guild:
             return
+        
+        start = time.perf_counter()
         
         player: tts_client.Player = message.guild.voice_client
         if not player:
@@ -54,6 +57,11 @@ class MessageEvent(commands.Cog):
             speaker=speaker,
             options={"style": style} if style is not None else {},
         ))
+        
+        end = time.perf_counter()
+
+        result = (end - start) * 1000
+        Log.debug(f"Speech request took: {result:.2f} ms")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(MessageEvent(bot))
