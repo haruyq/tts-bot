@@ -4,6 +4,7 @@ from discord.ext import commands
 import tts_client
 import os
 
+from utils.db import init_db
 from utils.config import get_config
 from utils.logger import Logger
 
@@ -38,6 +39,8 @@ class TTSBot(commands.Bot):
                     Log.error(f"[{ext}] Failed to Load: {e}")
 
     async def setup_hook(self):
+        await init_db()
+
         await self.load_cogs()
         await tts_client.Pool.connect(
             nodes=[

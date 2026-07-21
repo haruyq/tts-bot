@@ -4,6 +4,7 @@ from discord.ext import commands
 import tts_client
 import re
 
+from utils.db import get_speaker
 from utils.logger import Logger
 
 Log = Logger(__name__)
@@ -28,12 +29,17 @@ class MessageEvent(commands.Cog):
             return
         
         content = re.sub(r"https?://\S+", "リンク省略", message.content)
+        plugin, speaker, style = await get_speaker(message.author.id)
+
+        if content == "s":
+            await player.stop()
+            return
 
         await player.play(tts_client.Speech(
             text=content,
-            plugin="voicevox",
-            speaker="東北きりたん",
-            options={"style": "ノーマル"}
+            plugin=plugin,
+            speaker=speaker,
+            options={"style": style} if style is not None else {},
         ))
 
 async def setup(bot: commands.Bot):
