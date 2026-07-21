@@ -31,5 +31,6 @@ logging.basicConfig(
     handlers=[handler]
 )
 logging.getLogger("discord").propagate = False
+logging.getLogger("discord.gateway").setLevel(logging.WARNING)
 
 Logger = logging.getLogger
