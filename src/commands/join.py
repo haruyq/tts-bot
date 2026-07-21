@@ -23,7 +23,10 @@ class JoinCommand(commands.Cog):
         
         if not interaction.guild.voice_client:
             await voice.channel.connect(cls=tts_client.Player, self_deaf=True)
-            await interaction.response.send_message("VCに接続しました。")
+            await interaction.response.send_message(f"{voice.channel.mention} に接続しました。({voice.channel.mention} <-> {interaction.channel.mention})")
+            return
+        
+        await interaction.response.send_message(f"既に {voice.channel.mention} に接続しています。({voice.channel.mention} <-> {interaction.channel.mention})", ephemeral=True)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(JoinCommand(bot))
