@@ -71,7 +71,8 @@ class MessageEvent(commands.Cog):
         if not player:
             return
         
-        if not message.channel == player.channel:
+        voice = message.author.voice
+        if not voice or voice.channel != player.channel:
             return
 
         content = message.content.strip()
