@@ -27,5 +27,6 @@ logging.basicConfig(
     level=logging.DEBUG if config.log_level == "DEBUG" else logging.INFO,
     format=format
 )
+logging.getLogger("discord").propagate = False
 
 Logger = logging.getLogger

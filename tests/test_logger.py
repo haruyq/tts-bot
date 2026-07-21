@@ -8,6 +8,9 @@ sys.path.insert(0, str(Path(__file__).parents[1] / "src"))
 from utils.logger import ColorFormatter
 
 class ColorFormatterTest(unittest.TestCase):
+    def test_discord_logs_do_not_propagate_to_root_logger(self):
+        self.assertFalse(logging.getLogger("discord").propagate)
+
     def test_uses_exiled_log_colors(self):
         formatter = ColorFormatter()
         colors = {
