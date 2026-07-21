@@ -19,21 +19,13 @@ async def init_db() -> None:
                 style TEXT
             )
         """)
-        cursor = await db.execute("PRAGMA table_info(user_speakers)")
-        columns = {row[1] for row in await cursor.fetchall()}
-
-        if "plugin" not in columns:
-            await db.execute(
-                "ALTER TABLE user_speakers "
-                "ADD COLUMN plugin TEXT NOT NULL DEFAULT 'voicevox'"
+        await db.execute("""
+            CREATE TABLE IF NOT EXISTS dictionary (
+                user_id INTEGER PRIMARY KEY,
+                word TEXT NOT NULL,
+                reading TEXT NOT NULL
             )
-
-        if "style" not in columns:
-            await db.execute(
-                "ALTER TABLE user_speakers "
-                "ADD COLUMN style TEXT DEFAULT 'ノーマル'"
-            )
-
+        """)
         await db.commit()
 
 async def set_speaker(
@@ -78,3 +70,51 @@ async def get_speaker(
         config.default_speaker,
         config.default_style,
     )
+
+async def set_dictionary(
+    user_id: int,
+    word: str,
+    reading: str,
+) -> None:
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            """
+            INSERT INTO dictionary (user_id, word, reading)
+            VALUES (?, ?, ?)
+            ON CONFLICT(user_id) DO UPDATE SET
+                word = excluded.word,
+                reading = excluded.reading
+            """,
+            (user_id, word, reading),
+        )
+        await db.commit()
+
+async def remove_dictionary(
+    user_id: int,
+    word: str,
+) -> None:
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            """
+            DELETE FROM dictionary
+            WHERE user_id = ? AND word = ?
+            """,
+            (user_id, word),
+        )
+        await db.commit()
+
+async def get_dictionary(
+    user_id: int,
+) -> list[tuple[str, str]]:
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute(
+            """
+            SELECT word, reading
+            FROM dictionary
+            WHERE user_id = ?
+            """,
+            (user_id,),
+        ) as cursor:
+            rows = await cursor.fetchall()
+
+    return rows
