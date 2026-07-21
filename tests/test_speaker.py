@@ -22,7 +22,7 @@ class SpeakerLayoutTest(unittest.TestCase):
         components = view.to_components()
 
         self.assertEqual(
-            components[1]["components"][0]["options"][1]["label"],
+            components[0]["components"][1]["components"][0]["options"][1]["label"],
             "VOICEVOX (2/2)",
         )
 

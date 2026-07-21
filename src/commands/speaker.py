@@ -90,8 +90,7 @@ class SpeakerCommand(commands.Cog):
 
         async def update(interaction, new_selection):
             await set_speaker(interaction.user.id, *new_selection)
-            view = ui.LayoutView()
-            view.add_item(self._build_layout(speakers, styles, new_selection))
+            view = self._build_layout(speakers, styles, new_selection)
             await interaction.response.edit_message(view=view)
 
         async def select_plugin(interaction):
