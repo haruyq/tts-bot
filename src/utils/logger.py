@@ -23,9 +23,12 @@ class ColorFormatter(logging.Formatter):
         color = self.colors.get(record.levelno)
         return f"{color}{message}\033[0m" if color else message
 
+handler = logging.StreamHandler()
+handler.setFormatter(ColorFormatter())
+
 logging.basicConfig(
     level=logging.DEBUG if config.log_level == "DEBUG" else logging.INFO,
-    format=format
+    handlers=[handler]
 )
 logging.getLogger("discord").propagate = False
 

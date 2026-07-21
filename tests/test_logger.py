@@ -11,6 +11,9 @@ class ColorFormatterTest(unittest.TestCase):
     def test_discord_logs_do_not_propagate_to_root_logger(self):
         self.assertFalse(logging.getLogger("discord").propagate)
 
+    def test_root_logger_uses_color_formatter(self):
+        self.assertIsInstance(logging.getLogger().handlers[0].formatter, ColorFormatter)
+
     def test_uses_exiled_log_colors(self):
         formatter = ColorFormatter()
         colors = {
