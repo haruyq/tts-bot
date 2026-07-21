@@ -6,7 +6,7 @@ import os
 
 from utils.db import init_db
 from utils.config import get_config
-from utils.logger import Logger
+from utils.logger import ColorFormatter, Logger
 
 config = get_config()
 Log = Logger(__name__)
@@ -58,4 +58,4 @@ class TTSBot(commands.Bot):
         await super().close()
         
 if __name__ == "__main__":
-    TTSBot().run(config.token)
+    TTSBot().run(config.token, log_formatter=ColorFormatter())
