@@ -2,12 +2,27 @@ import discord
 from discord.ext import commands
 
 import tts_client
+import json
+from pathlib import Path
 import re
 
 from utils.db import get_speaker
 from utils.logger import Logger
 
 Log = Logger(__name__)
+
+with (Path(__file__).parents[1] / "emoji" / "emoji_ja.json").open(encoding="utf-8") as file:
+    emoji_data = json.load(file)
+
+EMOJI_READINGS = {
+    emoji: data["short_name"]
+    for emoji, data in emoji_data.items()
+    if data["group"]
+}
+EMOJI_PATTERN = re.compile("|".join(map(re.escape, sorted(EMOJI_READINGS, key=len, reverse=True))))
+
+def replace_emojis(text: str) -> str:
+    return EMOJI_PATTERN.sub(lambda match: EMOJI_READINGS[match.group()], text.replace("\ufe0f", ""))
 
 def describe_attachments(attachments: list[discord.Attachment]) -> str:
     counts = {
@@ -69,7 +84,7 @@ class MessageEvent(commands.Cog):
             await player.stop()
             return
         
-        speech_text = re.sub(r"https?://\S+", "リンク省略", content)
+        speech_text = replace_emojis(re.sub(r"https?://\S+", "リンク省略", content))
         plugin, speaker, style = await get_speaker(message.author.id)
 
         await player.play(tts_client.Speech(
