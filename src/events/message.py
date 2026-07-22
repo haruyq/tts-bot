@@ -29,8 +29,7 @@ class MessageEvent(commands.Cog):
         if not player:
             return
         
-        voice = message.author.voice
-        if not voice or voice.channel != player.channel:
+        if message.channel != player.channel:
             return
 
         content = message.clean_content
