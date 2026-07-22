@@ -13,4 +13,4 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-tts-client = { path = "../tts-client", editable = true }
+tts-client = { git = "https://github.com/haruyq/tts-client.git" }
