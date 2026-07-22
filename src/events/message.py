@@ -58,6 +58,8 @@ class MessageEvent(commands.Cog):
         
         speech_text = await default_replace_dict_words(speech_text)
         speech_text = await replace_dict_words(message.author.id, speech_text)
+        
+        Log.debug(f"Speech request: {speech_text} (plugin={plugin}, speaker={speaker}, style={style})")
 
         await player.play(tts_client.Speech(
             text=speech_text,
