@@ -1,0 +1,9 @@
+.git
+.agents
+.venv
+.vscode
+**/__pycache__
+**/*.py[cod]
+**/.env
+data
+tests
