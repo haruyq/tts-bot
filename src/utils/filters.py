@@ -72,10 +72,14 @@ def replace_urls(text: str) -> str:
 def replace_codeblocks(text: str) -> str:
     return re.compile(r"```.*?```", re.DOTALL).sub("コードブロック", text)
 
+def replace_custom_emojis(text: str) -> str:
+    return re.compile(r"<a?:\w+:\d+>").sub("絵文字", text)
+
 async def apply_filters(user_id: int, text: str) -> str:
     text = replace_emojis(text)
     text = replace_urls(text)
     text = replace_codeblocks(text)
+    text = replace_custom_emojis(text)
     text = default_replace_dict_words(text)
     text = await replace_dict_words(user_id, text)
     return text
