@@ -53,7 +53,7 @@ class MessageEvent(commands.Cog):
         if not speech_text:
             return
         
-        Log.debug(f"Speech request: {speech_text} (plugin={plugin}, speaker={speaker}, style={style})")
+        Log.debug(f"Speech queued: {speech_text} (plugin={plugin}, speaker={speaker}, style={style})")
 
         await player.queue.put_wait(tts_client.Speech(
             text=speech_text,
@@ -61,6 +61,8 @@ class MessageEvent(commands.Cog):
             speaker=speaker,
             options={"style": style} if style is not None else {},
         ))
+        
+        await self.bot.process_commands(message)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(MessageEvent(bot))
