@@ -21,9 +21,7 @@ class MessageEvent(commands.Cog):
         
         if not message.guild:
             return
-        
-        start = time.perf_counter()
-        
+                
         player: tts_client.Player = message.guild.voice_client
         if not player:
             return
@@ -57,17 +55,12 @@ class MessageEvent(commands.Cog):
         
         Log.debug(f"Speech request: {speech_text} (plugin={plugin}, speaker={speaker}, style={style})")
 
-        await player.play(tts_client.Speech(
+        await player.queue.put_wait(tts_client.Speech(
             text=speech_text,
             plugin=plugin,
             speaker=speaker,
             options={"style": style} if style is not None else {},
         ))
-        
-        end = time.perf_counter()
-
-        result = (end - start) * 1000
-        Log.debug(f"Speech request took: {result:.2f} ms")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(MessageEvent(bot))
