@@ -56,7 +56,7 @@ async def replace_dict_words(user_id: int, text: str) -> str:
 
     return text
 
-async def default_replace_dict_words(text: str) -> str:
+def default_replace_dict_words(text: str) -> str:
     default_dictionary = {
         "@": "あて、",
     }
@@ -64,4 +64,18 @@ async def default_replace_dict_words(text: str) -> str:
     for word, reading in default_dictionary.items():
         text = text.replace(word, reading)
 
+    return text
+
+def replace_urls(text: str) -> str:
+    return re.compile(r"https?://\S+").sub("リンク省略", text)
+
+def replace_codeblocks(text: str) -> str:
+    return re.compile(r"```.*?```", re.DOTALL).sub("コードブロック", text)
+
+async def apply_filters(user_id: int, text: str) -> str:
+    text = replace_emojis(text)
+    text = replace_urls(text)
+    text = replace_codeblocks(text)
+    text = default_replace_dict_words(text)
+    text = await replace_dict_words(user_id, text)
     return text

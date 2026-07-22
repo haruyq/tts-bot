@@ -2,10 +2,9 @@ import discord
 from discord.ext import commands
 
 import tts_client
-import re
 import time
 
-from utils.filters import replace_emojis, describe_attachments, replace_dict_words, default_replace_dict_words
+from utils.filters import apply_filters, describe_attachments
 from utils.db import get_speaker
 from utils.logger import Logger
 
@@ -50,14 +49,11 @@ class MessageEvent(commands.Cog):
             attachment_content = describe_attachments(attachments)
             content = f"{attachment_content}、{content}" if content else attachment_content
         
-        speech_text = replace_emojis(re.sub(r"https?://\S+", "リンク省略", content))
+        speech_text = await apply_filters(message.author.id, content)
         plugin, speaker, style = await get_speaker(message.author.id)
         
         if not speech_text:
             return
-        
-        speech_text = await default_replace_dict_words(speech_text)
-        speech_text = await replace_dict_words(message.author.id, speech_text)
         
         Log.debug(f"Speech request: {speech_text} (plugin={plugin}, speaker={speaker}, style={style})")
 

@@ -7,7 +7,8 @@ from unittest.mock import AsyncMock, patch
 
 sys.path.insert(0, str(Path(__file__).parents[1] / "src"))
 
-from events.message import MessageEvent, replace_emojis
+from events.message import MessageEvent
+from utils.filters import replace_emojis
 
 class EmojiReplacementTest(unittest.TestCase):
     def test_replaces_emoji_with_japanese_reading(self):
@@ -32,12 +33,12 @@ class MessageEventTest(unittest.IsolatedAsyncioTestCase):
                 author=SimpleNamespace(
                     bot=False,
                     id=index,
-                    voice=SimpleNamespace(channel=player.channel),
                 ),
                 guild=SimpleNamespace(voice_client=player),
-                channel=object(),
-                content=f"メッセージ{index}",
+                channel=player.channel,
+                clean_content=f"メッセージ{index}",
                 attachments=[],
+                message_snapshots=[],
             )
             for index, player in enumerate(players)
         ]
@@ -46,7 +47,7 @@ class MessageEventTest(unittest.IsolatedAsyncioTestCase):
             "events.message.get_speaker",
             AsyncMock(return_value=("voicevox", "ずんだもん", "ノーマル")),
         ), patch(
-            "events.message.get_dictionary",
+            "utils.filters.get_dictionary",
             AsyncMock(return_value=[]),
         ):
             await asyncio.gather(*(
