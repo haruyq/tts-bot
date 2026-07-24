@@ -34,10 +34,12 @@ class VoiceStateEvent(commands.Cog):
         plugin, speaker, style = await get_speaker(member.id)
         
         await player.play(
-            tts_client.Speech(f"{member.display_name}が{action}しました"),
-            plugin=plugin,
-            speaker=speaker,
-            options={"style": style} if style is not None else {},
+            tts_client.Speech(
+                f"{member.display_name}が{action}しました",
+                plugin=plugin,
+                speaker=speaker,
+                options={"style": style} if style is not None else {},
+            )
         )
 
 async def setup(bot: commands.Bot):
