@@ -25,6 +25,7 @@ class VoiceStateEvent(commands.Cog):
         if not humans:
             Log.debug(f"Auto disconnected from {player.channel.name} in {member.guild.name} due to no humans left.")
             await player.disconnect()
+            return
         
         if (before.channel is None) == (after.channel is None):
             return
