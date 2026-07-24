@@ -36,8 +36,12 @@ class SynthesizeCommand(commands.Cog):
             "style": style
         }
         
+        headers = {
+            "Authorization": f"Bearer {config.tts_password}"
+        }
+        
         async with aiohttp.ClientSession() as session:
-            async with session.post(f"{config.tts_base_url}/api/synthesize", json=data) as resp:
+            async with session.post(f"{config.tts_base_url}/api/synthesize", json=data, headers=headers) as resp:
                 if resp.status == 200:
                     audio_data = await resp.read()
                     await interaction.followup.send(file=discord.File(fp=audio_data, filename="tts.wav"))
