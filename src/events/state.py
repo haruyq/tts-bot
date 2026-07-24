@@ -14,7 +14,7 @@ class VoiceStateEvent(commands.Cog):
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
-        if member.bot or not before.channel or (after.channel and before.channel == after.channel):
+        if member.bot or (after.channel and before.channel == after.channel):
             return
         
         player: tts_client.Player = member.guild.voice_client

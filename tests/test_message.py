@@ -20,14 +20,23 @@ class EmojiReplacementTest(unittest.TestCase):
 class MessageEventTest(unittest.IsolatedAsyncioTestCase):
     async def test_routes_messages_to_each_guild_player(self):
         class Player:
-            def __init__(self, channel):
-                self.channel = channel
-                self.speeches = []
+            class Queue:
+                def __init__(self):
+                    self.speeches = []
 
-            async def play(self, speech):
-                self.speeches.append(speech)
+                async def put_wait(self, speech):
+                    self.speeches.append(speech)
 
-        players = [Player(object()), Player(object())]
+            def __init__(self, voice_channel, text_channel):
+                self.channel = voice_channel
+                self.home = text_channel
+                self.queue = self.Queue()
+
+        text_channels = [object(), object()]
+        players = [
+            Player(object(), text_channel)
+            for text_channel in text_channels
+        ]
         messages = [
             SimpleNamespace(
                 author=SimpleNamespace(
@@ -35,12 +44,12 @@ class MessageEventTest(unittest.IsolatedAsyncioTestCase):
                     id=index,
                 ),
                 guild=SimpleNamespace(voice_client=player),
-                channel=player.channel,
+                channel=text_channel,
                 clean_content=f"メッセージ{index}",
                 attachments=[],
                 message_snapshots=[],
             )
-            for index, player in enumerate(players)
+            for index, (player, text_channel) in enumerate(zip(players, text_channels))
         ]
 
         with patch(
@@ -50,13 +59,14 @@ class MessageEventTest(unittest.IsolatedAsyncioTestCase):
             "utils.filters.get_dictionary",
             AsyncMock(return_value=[]),
         ):
+            event = MessageEvent(SimpleNamespace(process_commands=AsyncMock()))
             await asyncio.gather(*(
-                MessageEvent(None).on_message(message)
+                event.on_message(message)
                 for message in messages
             ))
 
         self.assertEqual(
-            [player.speeches[0].text for player in players],
+            [player.queue.speeches[0].text for player in players],
             ["メッセージ0", "メッセージ1"],
         )
 
