@@ -4,6 +4,7 @@ from discord import app_commands
 
 import tts_client
 
+from utils.db import set_connection
 from utils.logger import Logger
 
 Log = Logger(__name__)
@@ -24,7 +25,12 @@ class JoinCommand(commands.Cog):
         player = interaction.guild.voice_client
         if not player:
             player = await voice.channel.connect(cls=tts_client.Player, self_deaf=True)
-            player.home = interaction.channel 
+            player.home = interaction.channel
+            await set_connection(
+                interaction.guild.id,
+                voice.channel.id,
+                interaction.channel.id,
+            )
             
             await interaction.response.send_message(f"{voice.channel.mention} に接続しました。({voice.channel.mention} <-> {interaction.channel.mention})")
             return

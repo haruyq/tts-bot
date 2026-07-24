@@ -17,14 +17,21 @@ class VoiceStateEventTest(unittest.IsolatedAsyncioTestCase):
         )
         member = SimpleNamespace(
             bot=False,
-            guild=SimpleNamespace(name="Guild", voice_client=player),
+            guild=SimpleNamespace(id=1, name="Guild", voice_client=player),
         )
         before = SimpleNamespace(channel=player.channel)
         after = SimpleNamespace(channel=None)
 
-        with patch("events.state.get_speaker", AsyncMock()) as get_speaker:
+        with patch(
+            "events.state.remove_connection",
+            AsyncMock(),
+        ) as remove_connection, patch(
+            "events.state.get_speaker",
+            AsyncMock(),
+        ) as get_speaker:
             await VoiceStateEvent(SimpleNamespace()).on_voice_state_update(member, before, after)
 
+        remove_connection.assert_awaited_once_with(member.guild.id)
         player.disconnect.assert_awaited_once_with()
         player.play.assert_not_awaited()
         get_speaker.assert_not_awaited()

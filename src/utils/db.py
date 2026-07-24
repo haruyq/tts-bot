@@ -27,6 +27,13 @@ async def init_db() -> None:
                 PRIMARY KEY (user_id, word)
             )
         """)
+        await db.execute("""
+            CREATE TABLE IF NOT EXISTS guild_connections (
+                guild_id INTEGER PRIMARY KEY,
+                voice_channel_id INTEGER NOT NULL,
+                text_channel_id INTEGER NOT NULL
+            )
+        """)
 
         async with db.execute("PRAGMA table_info(dictionary)") as cursor:
             dictionary_columns = await cursor.fetchall()
@@ -48,6 +55,53 @@ async def init_db() -> None:
             await db.execute("DROP TABLE old_dictionary")
 
         await db.commit()
+
+async def set_connection(
+    guild_id: int,
+    voice_channel_id: int,
+    text_channel_id: int,
+) -> None:
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            """
+            INSERT INTO guild_connections (
+                guild_id,
+                voice_channel_id,
+                text_channel_id
+            )
+            VALUES (?, ?, ?)
+            ON CONFLICT(guild_id) DO UPDATE SET
+                voice_channel_id = excluded.voice_channel_id,
+                text_channel_id = excluded.text_channel_id
+            """,
+            (guild_id, voice_channel_id, text_channel_id),
+        )
+        await db.commit()
+
+async def remove_connection(
+    guild_id: int,
+) -> None:
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            """
+            DELETE FROM guild_connections
+            WHERE guild_id = ?
+            """,
+            (guild_id,),
+        )
+        await db.commit()
+
+async def get_connections() -> list[tuple[int, int, int]]:
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute(
+            """
+            SELECT guild_id, voice_channel_id, text_channel_id
+            FROM guild_connections
+            """
+        ) as cursor:
+            rows = await cursor.fetchall()
+
+    return rows
 
 async def set_speaker(
     user_id: int,

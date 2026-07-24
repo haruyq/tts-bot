@@ -3,7 +3,7 @@ from discord.ext import commands
 
 import tts_client
 
-from utils.db import get_speaker
+from utils.db import get_speaker, remove_connection
 from utils.logger import Logger
 
 Log = Logger(__name__)
@@ -24,6 +24,7 @@ class VoiceStateEvent(commands.Cog):
         humans = [m for m in player.channel.members if not m.bot]
         if not humans:
             Log.debug(f"Auto disconnected from {player.channel.name} in {member.guild.name} due to no humans left.")
+            await remove_connection(member.guild.id)
             await player.disconnect()
             return
         

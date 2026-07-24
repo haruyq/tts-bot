@@ -4,6 +4,7 @@ from discord import app_commands
 
 import tts_client
 
+from utils.db import remove_connection
 from utils.logger import Logger
 
 Log = Logger(__name__)
@@ -21,9 +22,15 @@ class LeaveCommand(commands.Cog):
             await interaction.response.send_message("VCに接続してから実行してください。", ephemeral=True)
             return
         
-        if interaction.guild.voice_client:
-            await interaction.guild.voice_client.disconnect()
-            await interaction.response.send_message("切断しました。")
+        player = interaction.guild.voice_client
+        await remove_connection(interaction.guild.id)
+
+        if not player:
+            await interaction.response.send_message("接続していません。", ephemeral=True)
+            return
+
+        await player.disconnect()
+        await interaction.response.send_message("切断しました。")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(LeaveCommand(bot))
