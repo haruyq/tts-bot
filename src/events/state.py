@@ -3,6 +3,7 @@ from discord.ext import commands
 
 import tts_client
 
+from utils.db import get_speaker
 from utils.logger import Logger
 
 Log = Logger(__name__)
@@ -29,9 +30,14 @@ class VoiceStateEvent(commands.Cog):
             return
         
         action = "参加" if after.channel is not None else "退出"
-
+        
+        plugin, speaker, style = await get_speaker(member.id)
+        
         await player.play(
-            tts_client.Speech(f"{member.display_name}が{action}しました")
+            tts_client.Speech(f"{member.display_name}が{action}しました"),
+            plugin=plugin,
+            speaker=speaker,
+            options={"style": style} if style is not None else {},
         )
 
 async def setup(bot: commands.Bot):
