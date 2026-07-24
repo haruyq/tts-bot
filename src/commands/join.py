@@ -21,8 +21,11 @@ class JoinCommand(commands.Cog):
             await interaction.response.send_message("VCに接続してから実行してください。", ephemeral=True)
             return
         
-        if not interaction.guild.voice_client:
-            await voice.channel.connect(cls=tts_client.Player, self_deaf=True)
+        player = interaction.guild.voice_client
+        if not player:
+            player = await voice.channel.connect(cls=tts_client.Player, self_deaf=True)
+            player.home = interaction.channel 
+            
             await interaction.response.send_message(f"{voice.channel.mention} に接続しました。({voice.channel.mention} <-> {interaction.channel.mention})")
             return
         

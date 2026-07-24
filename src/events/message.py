@@ -26,7 +26,7 @@ class MessageEvent(commands.Cog):
         if not player:
             return
         
-        if message.channel != player.channel:
+        if message.channel != getattr(player, "home", None):
             return
 
         content = message.clean_content
