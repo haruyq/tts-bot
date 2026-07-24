@@ -24,6 +24,15 @@ class VoiceStateEvent(commands.Cog):
         if not humans:
             Log.debug(f"Auto disconnected from {player.channel.name} in {member.guild.name} due to no humans left.")
             await player.disconnect()
+        
+        if (before.channel is None) == (after.channel is None):
+            return
+        
+        action = "参加" if after.channel is not None else "退出"
+
+        await player.play(
+            tts_client.Speech(f"{member.display_name}が{action}しました")
+        )
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(VoiceStateEvent(bot))
