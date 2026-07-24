@@ -17,6 +17,8 @@ async def read(interaction: discord.Interaction, message: discord.Message):
     if not player:
         return
     
+    content = message.clean_content
+
     if message.attachments:
         attachment_content = describe_attachments(message.attachments)
         content = f"{attachment_content}、{content}" if content else attachment_content
