@@ -30,7 +30,7 @@ async def read(interaction: discord.Interaction, message: discord.Message):
         plugin=plugin,
         speaker=speaker,
         text=speech_text,
-        style=style
+        options={"style": style} if style is not None else {},
     ))
 
 async def setup(bot: commands.Bot):

@@ -3,6 +3,7 @@ from discord.ext import commands
 from discord import app_commands
 
 import aiohttp
+import io
 
 from utils.filters import describe_attachments, apply_filters
 from utils.config import get_config
@@ -42,7 +43,7 @@ async def synthesize(interaction: discord.Interaction, message: discord.Message)
         async with session.post(f"{config.tts_base_url}/api/synthesize", json=data, headers=headers) as resp:
             if resp.status == 200:
                 audio_data = await resp.read()
-                await interaction.followup.send(file=discord.File(fp=audio_data, filename="tts.wav"))
+                await interaction.followup.send(file=discord.File(fp=io.BytesIO(audio_data), filename="tts.wav"))
             else:
                 Log.error(f"Failed to synthesize TTS: {resp.status} - {await resp.text()}")
                 await interaction.followup.send(f"生成に失敗しました。\nHTTP: {resp.status}", ephemeral=True)
