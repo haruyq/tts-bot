@@ -16,10 +16,16 @@ class JoinCommand(commands.Cog):
     @app_commands.command(name="join", description="VCに接続し、読み上げを開始します。")
     @app_commands.checks.cooldown(1, 5.0, key=lambda i: i.guild.id)
     async def join(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+        
         voice = interaction.user.voice
         
         if not voice:
-            await interaction.response.send_message("VCに接続してから実行してください。", ephemeral=True)
+            embed = discord.Embed(
+                description="VCに接続してから実行してください。",
+                color=discord.Colour.red()
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
             return
         
         player = interaction.guild.voice_client
@@ -32,10 +38,18 @@ class JoinCommand(commands.Cog):
                 interaction.channel.id,
             )
             
-            await interaction.response.send_message(f"{voice.channel.mention} に接続しました。({voice.channel.mention} <-> {interaction.channel.mention})")
+            embed = discord.Embed(
+                description=f"{voice.channel.mention} に接続しました。",
+                color=discord.Colour.green()
+            )
+            await interaction.followup.send(embed=embed)
             return
         
-        await interaction.response.send_message(f"既に {voice.channel.mention} に接続しています。({voice.channel.mention} <-> {interaction.channel.mention})", ephemeral=True)
+        embed = discord.Embed(
+            description=f"既に {voice.channel.mention} に接続しています。",
+            color=discord.Colour.red()
+        )
+        await interaction.followup.send(embed=embed, ephemeral=True)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(JoinCommand(bot))

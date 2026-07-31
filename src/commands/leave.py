@@ -19,18 +19,30 @@ class LeaveCommand(commands.Cog):
         voice = interaction.user.voice
         
         if not voice:
-            await interaction.response.send_message("VCに接続してから実行してください。", ephemeral=True)
+            embed = discord.Embed(
+                description="VCに接続してから実行してください。",
+                color=discord.Colour.red()
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
             return
         
         player = interaction.guild.voice_client
         await remove_connection(interaction.guild.id)
 
         if not player:
-            await interaction.response.send_message("接続していません。", ephemeral=True)
+            embed = discord.Embed(
+                description="BotはVCに接続していません。",
+                color=discord.Colour.red()
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
             return
 
         await player.disconnect()
-        await interaction.response.send_message("切断しました。")
+        embed = discord.Embed(
+            description="切断しました。",
+            color=discord.Colour.green()
+        )
+        await interaction.followup.send(embed=embed)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(LeaveCommand(bot))
