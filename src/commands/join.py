@@ -28,7 +28,7 @@ class JoinCommand(commands.Cog):
             await interaction.followup.send(embed=embed, ephemeral=True)
             return
         
-        player = interaction.guild.voice_client
+        player: tts_client.Player = interaction.guild.voice_client
         if not player:
             player = await voice.channel.connect(cls=tts_client.Player, self_deaf=True)
             player.home = interaction.channel

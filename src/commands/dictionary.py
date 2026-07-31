@@ -2,8 +2,6 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 
-import tts_client
-
 from utils.db import set_dictionary, remove_dictionary, get_dictionary
 from utils.logger import Logger
 

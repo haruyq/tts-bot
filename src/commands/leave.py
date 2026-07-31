@@ -26,7 +26,7 @@ class LeaveCommand(commands.Cog):
             await interaction.followup.send(embed=embed, ephemeral=True)
             return
         
-        player = interaction.guild.voice_client
+        player: tts_client.Player = interaction.guild.voice_client
         await remove_connection(interaction.guild.id)
 
         if not player:
