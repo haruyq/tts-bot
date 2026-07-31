@@ -4,7 +4,7 @@ from discord import app_commands
 
 import tts_client
 
-from utils.db import set_connection
+from utils.db import set_connection, get_speaker
 from utils.logger import Logger
 
 Log = Logger(__name__)
@@ -37,6 +37,15 @@ class JoinCommand(commands.Cog):
                 voice.channel.id,
                 interaction.channel.id,
             )
+
+            plugin, speaker, style = await get_speaker(interaction.user.id)
+
+            await player.play(tts_client.Speech(
+                plugin=plugin,
+                speaker=speaker,
+                text="接続しました。",
+                options={"style": style} if style is not None else {},
+            ))
             
             embed = discord.Embed(
                 description=f"{voice.channel.mention} に接続しました。",
