@@ -18,7 +18,7 @@ async def make_tts(interaction: discord.Interaction, message: discord.Message, s
     await interaction.response.defer()
 
     content = message.clean_content
-    user = message.author if self_speaker else interaction.user
+    user = interaction.user if self_speaker else message.author
 
     if message.attachments:
         attachment_content = describe_attachments(message.attachments)
