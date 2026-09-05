@@ -956,13 +956,13 @@ requires-dist = [
     { name = "discord-py", extras = ["voice"], specifier = ">=2.7.1" },
     { name = "pydantic", specifier = ">=2.13.4" },
     { name = "pydantic-settings", specifier = ">=2.14.2" },
-    { name = "tts-client", git = "https://github.com/haruyq/tts-client.git" },
+    { name = "tts-client", git = "https://github.com/haruyq/tts-client.git?tag=v0.1.1" },
 ]
 
 [[package]]
 name = "tts-client"
-version = "0.1.0"
-source = { git = "https://github.com/haruyq/tts-client.git#e03474444de9f77a0d3bee85378a4133ea13dfe6" }
+version = "0.1.1"
+source = { git = "https://github.com/haruyq/tts-client.git?tag=v0.1.1#58df8b5b511228da26d83a1b9a70f6a569fcb693" }
 dependencies = [
     { name = "aiohttp" },
     { name = "discord-py" },
