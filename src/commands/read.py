@@ -25,7 +25,7 @@ async def read(interaction: discord.Interaction, message: discord.Message):
         attachment_content = describe_attachments(message.attachments)
         content = f"{attachment_content}、{content}" if content else attachment_content
 
-    speech_text = await apply_filters(message.author.id, content)
+    speech_text = await apply_filters(message.author.id, content, interaction.guild_id)
     plugin, speaker, style = await get_speaker(message.author.id)
     
     await player.play(tts_client.Speech(

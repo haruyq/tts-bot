@@ -28,6 +28,14 @@ async def init_db() -> None:
             )
         """)
         await db.execute("""
+            CREATE TABLE IF NOT EXISTS guild_dictionary (
+                guild_id INTEGER NOT NULL,
+                word TEXT NOT NULL,
+                reading TEXT NOT NULL,
+                PRIMARY KEY (guild_id, word)
+            )
+        """)
+        await db.execute("""
             CREATE TABLE IF NOT EXISTS guild_connections (
                 guild_id INTEGER PRIMARY KEY,
                 voice_channel_id INTEGER NOT NULL,
@@ -188,6 +196,53 @@ async def get_dictionary(
             WHERE user_id = ?
             """,
             (user_id,),
+        ) as cursor:
+            rows = await cursor.fetchall()
+
+    return rows
+
+async def set_guild_dictionary(
+    guild_id: int,
+    word: str,
+    reading: str,
+) -> None:
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            """
+            INSERT INTO guild_dictionary (guild_id, word, reading)
+            VALUES (?, ?, ?)
+            ON CONFLICT(guild_id, word) DO UPDATE SET
+                reading = excluded.reading
+            """,
+            (guild_id, word, reading),
+        )
+        await db.commit()
+
+async def remove_guild_dictionary(
+    guild_id: int,
+    word: str,
+) -> None:
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            """
+            DELETE FROM guild_dictionary
+            WHERE guild_id = ? AND word = ?
+            """,
+            (guild_id, word),
+        )
+        await db.commit()
+
+async def get_guild_dictionary(
+    guild_id: int,
+) -> list[tuple[str, str]]:
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute(
+            """
+            SELECT word, reading
+            FROM guild_dictionary
+            WHERE guild_id = ?
+            """,
+            (guild_id,),
         ) as cursor:
             rows = await cursor.fetchall()
 
