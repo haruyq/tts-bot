@@ -171,6 +171,27 @@ async def set_dictionary(
         )
         await db.commit()
 
+async def replace_dictionary(
+    user_id: int,
+    dictionary: list[tuple[str, str]],
+) -> None:
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            """
+            DELETE FROM dictionary
+            WHERE user_id = ?
+            """,
+            (user_id,),
+        )
+        await db.executemany(
+            """
+            INSERT INTO dictionary (user_id, word, reading)
+            VALUES (?, ?, ?)
+            """,
+            [(user_id, word, reading) for word, reading in dictionary],
+        )
+        await db.commit()
+
 async def remove_dictionary(
     user_id: int,
     word: str,
@@ -215,6 +236,27 @@ async def set_guild_dictionary(
                 reading = excluded.reading
             """,
             (guild_id, word, reading),
+        )
+        await db.commit()
+
+async def replace_guild_dictionary(
+    guild_id: int,
+    dictionary: list[tuple[str, str]],
+) -> None:
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            """
+            DELETE FROM guild_dictionary
+            WHERE guild_id = ?
+            """,
+            (guild_id,),
+        )
+        await db.executemany(
+            """
+            INSERT INTO guild_dictionary (guild_id, word, reading)
+            VALUES (?, ?, ?)
+            """,
+            [(guild_id, word, reading) for word, reading in dictionary],
         )
         await db.commit()
 
