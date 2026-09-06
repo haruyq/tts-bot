@@ -2,7 +2,7 @@ import discord
 import json
 import re
 from pathlib import Path
-from utils.db import get_dictionary
+from utils.db import get_dictionary, get_guild_dictionary
 
 with (Path(__file__).parents[1] / "emoji" / "emoji_ja.json").open(encoding="utf-8") as file:
     emoji_data = json.load(file)
@@ -48,13 +48,18 @@ def describe_attachments(attachments: list[discord.Attachment]) -> str:
 
     return f"{'と'.join(parts)}が送信されました"
 
-async def replace_dict_words(user_id: int, text: str) -> str:
-    user_dictionary = dict(await get_dictionary(user_id))
+async def replace_dict_words(user_id: int, text: str, guild_id: int | None = None) -> str:
+    dictionary = dict(await get_dictionary(user_id))
 
-    for word, reading in user_dictionary.items():
-        text = text.replace(word, reading)
+    if guild_id is not None:
+        for word, reading in await get_guild_dictionary(guild_id):
+            dictionary.setdefault(word, reading)
 
-    return text
+    if not dictionary:
+        return text
+
+    pattern = re.compile("|".join(map(re.escape, dictionary)))
+    return pattern.sub(lambda match: dictionary[match.group()], text)
 
 def default_replace_dict_words(text: str) -> str:
     default_dictionary = {
@@ -75,11 +80,11 @@ def replace_codeblocks(text: str) -> str:
 def replace_custom_emojis(text: str) -> str:
     return re.compile(r"<a?:\w+:\d+>").sub("絵文字", text)
 
-async def apply_filters(user_id: int, text: str) -> str:
+async def apply_filters(user_id: int, text: str, guild_id: int | None = None) -> str:
     text = replace_emojis(text)
     text = replace_urls(text)
     text = replace_codeblocks(text)
     text = replace_custom_emojis(text)
     text = default_replace_dict_words(text)
-    text = await replace_dict_words(user_id, text)
+    text = await replace_dict_words(user_id, text, guild_id)
     return text

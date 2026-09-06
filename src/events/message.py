@@ -47,7 +47,7 @@ class MessageEvent(commands.Cog):
             attachment_content = describe_attachments(attachments)
             content = f"{attachment_content}、{content}" if content else attachment_content
         
-        speech_text = await apply_filters(message.author.id, content)
+        speech_text = await apply_filters(message.author.id, content, message.guild.id)
         plugin, speaker, style = await get_speaker(message.author.id)
         
         if not speech_text:

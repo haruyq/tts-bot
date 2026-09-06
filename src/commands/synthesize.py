@@ -24,7 +24,7 @@ async def make_tts(interaction: discord.Interaction, message: discord.Message, s
         attachment_content = describe_attachments(message.attachments)
         content = f"{attachment_content}、{content}" if content else attachment_content
 
-    speech_text = await apply_filters(user.id, content)
+    speech_text = await apply_filters(user.id, content, interaction.guild_id)
     
     plugin, speaker, style = await get_speaker(user.id)
     

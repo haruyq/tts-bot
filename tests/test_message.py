@@ -43,7 +43,7 @@ class MessageEventTest(unittest.IsolatedAsyncioTestCase):
                     bot=False,
                     id=index,
                 ),
-                guild=SimpleNamespace(voice_client=player),
+                guild=SimpleNamespace(id=index, voice_client=player),
                 channel=text_channel,
                 clean_content=f"メッセージ{index}",
                 attachments=[],
@@ -58,6 +58,9 @@ class MessageEventTest(unittest.IsolatedAsyncioTestCase):
         ), patch(
             "utils.filters.get_dictionary",
             AsyncMock(return_value=[]),
+        ), patch(
+            "utils.filters.get_guild_dictionary",
+            AsyncMock(side_effect=lambda guild_id: [("メッセージ", f"ギルド{guild_id}")]),
         ):
             event = MessageEvent(SimpleNamespace(process_commands=AsyncMock()))
             await asyncio.gather(*(
@@ -67,7 +70,7 @@ class MessageEventTest(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(
             [player.queue.speeches[0].text for player in players],
-            ["メッセージ0", "メッセージ1"],
+            ["ギルド00", "ギルド11"],
         )
 
 if __name__ == "__main__":
