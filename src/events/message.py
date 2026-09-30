@@ -47,20 +47,25 @@ class MessageEvent(commands.Cog):
             attachment_content = describe_attachments(attachments)
             content = f"{attachment_content}、{content}" if content else attachment_content
         
-        speech_text = await apply_filters(message.author.id, content, message.guild.id)
-        plugin, speaker, style = await get_speaker(message.author.id)
-        
-        if not speech_text:
-            return
-        
-        Log.debug(f"Speech queued: {speech_text} (plugin={plugin}, speaker={speaker}, style={style})")
+        try:
+            speech_text = await apply_filters(message.author.id, content, message.guild.id)
+            plugin, speaker, style = await get_speaker(message.author.id)
+            
+            if not speech_text:
+                return
+            
+            Log.debug(f"Speech queued: {speech_text} (plugin={plugin}, speaker={speaker}, style={style})")
 
-        await player.queue.put_wait(tts_client.Speech(
-            text=speech_text,
-            plugin=plugin,
-            speaker=speaker,
-            options={"style": style} if style is not None else {},
-        ))
+            await player.queue.put_wait(tts_client.Speech(
+                text=speech_text,
+                plugin=plugin,
+                speaker=speaker,
+                options={"style": style} if style is not None else {},
+            ))
+            
+        except Exception as e:
+            Log.error(f"Error processing message: {e}")
+            await message.reply(f"Error: {e}")
         
         await self.bot.process_commands(message)
 
