@@ -36,5 +36,30 @@ class VoiceStateEventTest(unittest.IsolatedAsyncioTestCase):
         player.play.assert_not_awaited()
         get_speaker.assert_not_awaited()
 
+    async def test_queues_join_announcement_instead_of_playing(self):
+        player = SimpleNamespace(
+            channel=SimpleNamespace(name="Voice", members=[SimpleNamespace(bot=False)]),
+            queue=SimpleNamespace(put_wait=AsyncMock()),
+            play=AsyncMock(),
+        )
+        member = SimpleNamespace(
+            bot=False,
+            display_name="Alice",
+            id=2,
+            guild=SimpleNamespace(id=1, name="Guild", voice_client=player),
+        )
+        before = SimpleNamespace(channel=None)
+        after = SimpleNamespace(channel=player.channel)
+
+        with patch(
+            "events.state.get_speaker",
+            AsyncMock(return_value=("plugin", "speaker", None)),
+        ):
+            await VoiceStateEvent(SimpleNamespace()).on_voice_state_update(member, before, after)
+
+        player.play.assert_not_awaited()
+        speech = player.queue.put_wait.await_args.args[0]
+        self.assertEqual(speech.text, "Aliceが参加しました")
+
 if __name__ == "__main__":
     unittest.main()

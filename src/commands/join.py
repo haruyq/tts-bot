@@ -40,7 +40,7 @@ class JoinCommand(commands.Cog):
 
             plugin, speaker, style = await get_speaker(interaction.user.id)
 
-            await player.play(tts_client.Speech(
+            await player.queue.put_wait(tts_client.Speech(
                 plugin=plugin,
                 speaker=speaker,
                 text="接続しました。",

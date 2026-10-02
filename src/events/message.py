@@ -3,12 +3,18 @@ from discord.ext import commands
 
 import tts_client
 import time
+from dataclasses import dataclass, field
 
 from utils.filters import apply_filters, describe_attachments
 from utils.db import get_speaker
 from utils.logger import Logger
 
 Log = Logger(__name__)
+
+@dataclass(frozen=True)
+class MessageSpeech(tts_client.Speech):
+    """読み上げ元のメッセージを持たせ、合成失敗時に返信できるようにする"""
+    message: discord.Message | None = field(default=None, compare=False)
 
 class MessageEvent(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -56,11 +62,12 @@ class MessageEvent(commands.Cog):
             
             Log.debug(f"Speech queued: {speech_text} (plugin={plugin}, speaker={speaker}, style={style})")
 
-            await player.queue.put_wait(tts_client.Speech(
+            await player.queue.put_wait(MessageSpeech(
                 text=speech_text,
                 plugin=plugin,
                 speaker=speaker,
                 options={"style": style} if style is not None else {},
+                message=message,
             ))
             
         except Exception as e:
@@ -68,6 +75,19 @@ class MessageEvent(commands.Cog):
             await message.reply(f"Error: {e}")
         
         await self.bot.process_commands(message)
+
+    @commands.Cog.listener()
+    async def on_tts_speech_exception(self, payload: tts_client.SpeechExceptionEventPayload):
+        message = getattr(payload.speech, "message", None)
+
+        if message is None or not isinstance(payload.exception, tts_client.APIError):
+            return
+
+        Log.error(f"Speech failed: {payload.exception}")
+        await message.channel.send(
+            f"Error: {payload.exception.message}",
+            reference=message.to_reference(fail_if_not_exists=False),
+        )
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(MessageEvent(bot))

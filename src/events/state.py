@@ -35,7 +35,7 @@ class VoiceStateEvent(commands.Cog):
         
         plugin, speaker, style = await get_speaker(member.id)
         
-        await player.play(
+        await player.queue.put_wait(
             tts_client.Speech(
                 f"{member.display_name}が{action}しました",
                 plugin=plugin,

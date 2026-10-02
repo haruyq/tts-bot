@@ -7,7 +7,9 @@ from unittest.mock import AsyncMock, patch
 
 sys.path.insert(0, str(Path(__file__).parents[1] / "src"))
 
-from events.message import MessageEvent
+import tts_client
+
+from events.message import MessageEvent, MessageSpeech
 from utils.filters import replace_emojis
 
 class EmojiReplacementTest(unittest.TestCase):
@@ -71,6 +73,28 @@ class MessageEventTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(
             [player.queue.speeches[0].text for player in players],
             ["ギルド00", "ギルド11"],
+        )
+
+    async def test_replies_with_server_error_when_speech_fails(self):
+        message = SimpleNamespace(
+            channel=SimpleNamespace(send=AsyncMock()),
+            to_reference=lambda **kwargs: "reference",
+        )
+        speech = MessageSpeech(text="こんにちは", plugin="p", speaker="s", message=message)
+        event = MessageEvent(SimpleNamespace())
+
+        await event.on_tts_speech_exception(SimpleNamespace(
+            speech=speech,
+            exception=tts_client.APIError("speech_failed", "Plugin error: down"),
+        ))
+        await event.on_tts_speech_exception(SimpleNamespace(
+            speech=speech,
+            exception=tts_client.InvalidState("Player disconnected"),
+        ))
+
+        message.channel.send.assert_awaited_once_with(
+            "Error: Plugin error: down",
+            reference="reference",
         )
 
 if __name__ == "__main__":
