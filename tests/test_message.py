@@ -85,7 +85,11 @@ class MessageEventTest(unittest.IsolatedAsyncioTestCase):
 
         await event.on_tts_speech_exception(SimpleNamespace(
             speech=speech,
-            exception=tts_client.APIError("speech_failed", "Plugin error: down"),
+            exception=tts_client.APIError(
+                "speech_failed",
+                "Connection timeout to host http://100.69.145.6:8765/v1/audio/speech, "
+                "[Connect call failed ('100.69.145.6', 8765)]",
+            ),
         ))
         await event.on_tts_speech_exception(SimpleNamespace(
             speech=speech,
@@ -93,7 +97,8 @@ class MessageEventTest(unittest.IsolatedAsyncioTestCase):
         ))
 
         message.channel.send.assert_awaited_once_with(
-            "Error: Plugin error: down",
+            "Error: Connection timeout to host ***/v1/audio/speech, "
+            "[Connect call failed ('***', 8765)]",
             reference="reference",
         )
 

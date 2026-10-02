@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 
 import tts_client
+import re
 import time
 from dataclasses import dataclass, field
 
@@ -10,6 +11,9 @@ from utils.db import get_speaker
 from utils.logger import Logger
 
 Log = Logger(__name__)
+
+# バックエンドのアドレスをDiscordに出さない (URLはパスを残し、スキームからポートまでを隠す)
+_ADDRESS = re.compile(r"https?://[^/\s]+|\b\d{1,3}(?:\.\d{1,3}){3}(?::\d+)?\b")
 
 @dataclass(frozen=True)
 class MessageSpeech(tts_client.Speech):
@@ -85,7 +89,7 @@ class MessageEvent(commands.Cog):
 
         Log.error(f"Speech failed: {payload.exception}")
         await message.channel.send(
-            f"Error: {payload.exception.message}",
+            f"Error: {_ADDRESS.sub('***', payload.exception.message)}",
             reference=message.to_reference(fail_if_not_exists=False),
         )
 
